@@ -24,6 +24,7 @@ use App\Livewire\EmployeeDeductionsAssignments\{EmployeeDeductionAssignmentIndex
 use App\Livewire\Employees\EditEmployee;
 use App\Livewire\Admin\JustifiedAbsenceList;
 use App\Livewire\Employees\JustifiedAbsence\JustifiedAbsenceManager;
+use App\Livewire\Employees\EditProfile;
 
 use App\Models\Employee;
 use Livewire\Livewire;
@@ -63,15 +64,15 @@ Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
-    
+
     // Dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'redirect'])->name('dashboard.redirect');
-    
+
     Route::get('/admin/dashboard', function() {
         checkAdmin();
         return view('admin.dashboard');
     })->name('admin.dashboard');
-    
+
     Route::get('/employee/dashboard', function() {
         checkEmployee();
         return view('employee.dashboard');
@@ -83,7 +84,7 @@ Route::middleware('auth')->group(function () {
 
     // Admin only routes
     Route::group(['middleware' => function($request, $next) { checkAdmin(); return $next($request); }], function() {
-        
+
         // Branches
         Route::get('/branches', Index::class)->name('branches.index');
         Route::get('/branches/create', Form::class)->name('branches.create');
@@ -181,18 +182,23 @@ Route::middleware('auth')->group(function () {
 
     // Employee only routes
     Route::group(['middleware' => function($request, $next) { checkEmployee(); return $next($request); }], function() {
-        
+
         // Employee attendance
         Route::get('/employee/attendance', \App\Livewire\Attendance\EmployeeAttendance::class)->name('employee.attendance');
-        
+
         // Justified absences (employee view)
         Route::get('/ausencias-justificadas', JustifiedAbsenceManager::class)->name('ausencias-justificadas');
-        
+
         // Employee payroll
         Route::get('/employee/payroll', [PayrollController::class, 'showEmployeePayroll'])->name('employee.payroll');
         Route::get('/employee/payroll/pdf', [PayrollController::class, 'downloadEmployeePayrollPDF'])->name('employee.payroll.pdf');
     });
 });
+
+// Ruta para que un empleado edite su propio perfil
+Route::middleware(['auth']) // o tu checkAdmin()
+    ->get('/employees/{employee}/edit', EditProfile::class)
+    ->name('employees.edit');
 
 // Register Livewire components
 Livewire::component('employees.edit-employee', EditEmployee::class);
